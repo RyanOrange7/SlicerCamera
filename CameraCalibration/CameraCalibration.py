@@ -1,9 +1,38 @@
 import os, vtk, qt, ctk, slicer, numpy as np
-import cv2
 from vtk.util.numpy_support import vtk_to_numpy
 
 from slicer.ScriptedLoadableModule import *
 
+print 'Current SlicerOpenCVSelfTest.py path = '
+scriptPath = os.path.dirname(os.path.abspath(__file__))
+print scriptPath
+
+
+
+# load the python wrapped OpenCV module
+try:
+  print 'Trying to import cv2'
+  # the module is in the python path
+  import cv2
+  print 'Imported!'
+except ImportError:
+  print 'Trying to import from file'
+  # for the build directory, load from the file
+  import imp, platform
+  if platform.system() == 'Windows':
+    cv2File = 'cv2.pyd'
+    cv2Path = '../../../../OpenCV-build/lib/Release/' + cv2File
+  else:
+    cv2File = 'cv2.so'
+    cv2Path = '../../../../OpenCV-build/lib/' + cv2File
+  cv2Path = os.path.abspath(os.path.join(scriptPath, cv2Path))
+  # in the build directory, this path should exist, but in the installed extension
+  # it should be in the python path, so only use the short file name
+  if not os.path.isfile(cv2Path):
+    print 'Full path not found: ',cv2Path
+    cv2Path = cv2File
+  print 'Loading cv2 from ',cv2Path
+  cv2 = imp.load_dynamic('cv2', cv2File)
 # CameraCalibration
 class CameraCalibration(ScriptedLoadableModule):
   def __init__(self, parent):
